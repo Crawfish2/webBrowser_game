@@ -1,0 +1,182 @@
+ body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #8B4513;
+            color: white;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .game-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .cookie-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .cookie-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 5px solid #D2691E;
+            background: radial-gradient(circle at 30% 30%, #F4A460, #D2691E);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            position: relative;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .cookie-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.4);
+        }
+
+        .cookie-button:active {
+            transform: scale(0.95);
+        }
+
+        .cookie-button::before {
+            content: '🍪';
+            font-size: 80px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .stats {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .score {
+            font-size: 2em;
+            font-weight: bold;
+            color: #FFD700;
+            margin: 10px 0;
+        }
+
+        .per-second {
+            font-size: 1.2em;
+            color: #FFED4E;
+        }
+
+        .shop {
+            flex: 1;
+            background: rgba(139, 69, 19, 0.8);
+            border: 3px solid #D2691E;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .shop h3 {
+            text-align: center;
+            color: #FFD700;
+            margin-top: 0;
+        }
+
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(210, 105, 30, 0.3);
+            border: 2px solid #D2691E;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+
+        .shop-item:hover {
+            background: rgba(210, 105, 30, 0.5);
+        }
+
+        .shop-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .shop-item.disabled:hover {
+            background: rgba(210, 105, 30, 0.3);
+        }
+
+        .item-info h4 {
+            margin: 0 0 5px 0;
+            color: #FFED4E;
+        }
+
+        .item-description {
+            font-size: 0.9em;
+            color: #DDD;
+        }
+
+        .item-purchase {
+            text-align: center;
+        }
+
+        .item-price {
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        .item-count {
+            font-size: 0.9em;
+            color: #FFED4E;
+        }
+
+        .buy-button {
+            background: #228B22;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .buy-button:hover {
+            background: #32CD32;
+        }
+
+        .buy-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .click-effect {
+            position: absolute;
+            color: #FFD700;
+            font-weight: bold;
+            pointer-events: none;
+            animation: fadeUp 1s ease-out forwards;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+        }
