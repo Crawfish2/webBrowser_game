@@ -1,0 +1,23 @@
+ body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #8B4513;
+            color: white;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        #cookie {
+            width: 200px;
+            height: 200px;
+            background: url('cookie.png') no-repeat center center;
+            background-size: contain;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }

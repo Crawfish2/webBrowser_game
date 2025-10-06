@@ -1,0 +1,3 @@
+function GameContainer() {
+}
+GameContainer();
