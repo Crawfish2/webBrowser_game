@@ -16,7 +16,7 @@
         #cookie {
             width: 200px;
             height: 200px;
-            background: url('cookie.png') no-repeat center center;
+            background: url('') no-repeat center center;
             background-size: contain;
             cursor: pointer;
             transition: transform 0.1s;
