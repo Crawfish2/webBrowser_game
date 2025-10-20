@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クッキークリッカー v2.0</title>
+    <style>
+        /* CSSはそのまま活用 */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #8B4513;
+            color: white;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .game-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px; /* 横幅を少し広げました */
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cookie-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .cookie-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 5px solid #D2691E;
+            background: radial-gradient(circle at 30% 30%, #F4A460, #D2691E);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            position: relative;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .cookie-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.4);
+        }
+
+        .cookie-button:active {
+            transform: scale(0.95);
+        }
+
+        .cookie-button::before {
+            content: '🍪';
+            font-size: 80px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .stats {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .score {
+            font-size: 2em;
+            font-weight: bold;
+            color: #FFD700;
+            margin: 10px 0;
+        }
+
+        .per-second {
+            font-size: 1.2em;
+            color: #FFED4E;
+        }
+
+        .right-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .shop, .upgrades {
+            background: rgba(139, 69, 19, 0.8);
+            border: 3px solid #D2691E;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 45vh; /* 高さ制限を変更 */
+        }
+        
+        /* アップグレードエリアのスタイルを追加 */
+        .upgrades {
+            min-height: 100px; /* 最低限の高さ */
+        }
+
+        .shop h3, .upgrades h3 {
+            text-align: center;
+            color: #FFD700;
+            margin-top: 0;
+            border-bottom: 1px solid #D2691E;
+            padding-bottom: 10px;
+        }
+
+        .shop-item, .upgrade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(210, 105, 30, 0.3);
+            border: 2px solid #D2691E;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .shop-item:hover, .upgrade-item:hover {
+            background: rgba(210, 105, 30, 0.5);
+        }
+
+        .shop-item.disabled, .upgrade-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .shop-item.disabled:hover, .upgrade-item.disabled:hover {
+            background: rgba(210, 105, 30, 0.3);
+        }
+        
+        .upgrade-item.purchased {
+            background: rgba(34, 139, 34, 0.5); /* 購入済みは緑っぽい色に */
+            cursor: default;
+        }
+
+        .item-info h4 {
+            margin: 0 0 5px 0;
+            color: #FFED4E;
+        }
+
+        .item-description {
+            font-size: 0.9em;
+            color: #DDD;
+        }
+
+        .item-purchase {
+            text-align: center;
+        }
+
+        .item-price {
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        .item-count {
+            font-size: 0.9em;
+            color: #FFED4E;
+        }
+
+        .buy-button {
+            background: #228B22;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        /* アップグレードの購入ボタンのスタイル */
+        .upgrade-button {
+            background: #4682B4; /* 青系の色に */
+        }
+
+        .buy-button:hover:not(:disabled), .upgrade-button:hover:not(:disabled) {
+            background: #32CD32;
+        }
+        
+        .upgrade-button:hover:not(:disabled) {
+            background: #5CACEE;
+        }
+
+        .buy-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .click-effect {
+            position: absolute;
+            color: #FFD700;
+            font-weight: bold;
+            pointer-events: none;
+            animation: fadeUp 1s ease-out forwards;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🍪 クッキークリッカー v2.0 🍪</h1>
+    <div class="game-container">
+        <div class="left-panel">
+            <div class="cookie-area">
+                <div class="stats">
+                    <div class="score" id="score">0 クッキー</div>
+                    <div class="per-second" id="perSecond">毎秒 0 クッキー</div>
+                    <div class="per-click" id="perClick">クリック +1 クッキー</div>
+                </div>
+                
+                <div class="cookie-button" id="cookieButton"></div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="upgrades">
+                <h3>✨ アップグレード</h3>
+                <div id="upgradeItems"></div>
+            </div>
+            <div class="shop">
+                <h3>🏪 建物</h3>
+                <div id="shopItems"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ゲーム状態 ---
+        let cookies = 0;
+        let cookiesPerSecond = 0;
+        let cookiesPerClick = 1;
+
+        // --- DOM要素 ---
+        const scoreElement = document.getElementById('score');
+        const perSecondElement = document.getElementById('perSecond');
+        const perClickElement = document.getElementById('perClick');
+        const cookieButton = document.getElementById('cookieButton');
+        const shopItemsContainer = document.getElementById('shopItems');
+        const upgradeItemsContainer = document.getElementById('upgradeItems');
+
+        // --- データ定義 ---
+
+        // 建物アイテム (Buildings)
+        const buildings = [
+            { id: 'grandma', name: "おばあちゃん", description: "毎秒1クッキーを生産", basePrice: 15, cps: 1, count: 0, emoji: "👵" },
+            { id: 'farm', name: "農場", description: "毎秒8クッキーを生産", basePrice: 100, cps: 8, count: 0, emoji: "🚜" },
+            { id: 'factory', name: "工場", description: "毎秒47クッキーを生産", basePrice: 1100, cps: 47, count: 0, emoji: "🏭" },
+            { id: 'bank', name: "銀行", description: "毎秒260クッキーを生産", basePrice: 12000, cps: 260, count: 0, emoji: "🏦" }
+        ];
+
+        // アップグレードアイテム (Upgrades)
+        const upgrades = [
+            { id: 'cursor_boost', name: "強化クリック", description: "クリック生産量が2倍になる", price: 100, type: 'click', multiplier: 2, purchased: false, emoji: "👆" },
+            { id: 'grandma_baking', name: "賢いおばあちゃん", description: "おばあちゃんの生産量が2倍になる", price: 1000, type: 'building', targetId: 'grandma', multiplier: 2, purchased: false, emoji: "👩‍🍳" },
+            { id: 'better_tools', name: "高性能な農具", description: "農場の生産量が2倍になる", price: 5000, type: 'building', targetId: 'farm', multiplier: 2, purchased: false, emoji: "🔧" }
+        ];
+
+        // --- 関数定義 ---
+
+        // クッキーをクリック
+        cookieButton.addEventListener('click', (event) => {
+            cookies += cookiesPerClick;
+            updateDisplay();
+            updateShop(); // クリックで残高が変わるのでショップも更新
+            showClickEffect(event.clientX, event.clientY, cookiesPerClick);
+        });
+
+        // クリック効果を表示
+        function showClickEffect(x, y, amount) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.textContent = `+${formatNumber(amount)}`; // フォーマット適用
+            effect.style.left = x + 'px';
+            effect.style.top = y + 'px';
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 1000);
+        }
+
+        // アイテムの価格を計算 (建物)
+        function getItemPrice(item) {
+            return Math.floor(item.basePrice * Math.pow(1.15, item.count));
+        }
+
+        // 建物アイテムを購入
+        function buyBuilding(index) {
+            const item = buildings[index];
+            const price = getItemPrice(item);
+            
+            if (cookies >= price) {
+                cookies -= price;
+                item.count++;
+                updateCookiesPerSecond(); // CPSを再計算
+                updateDisplay();
+                updateShop();
+            }
+        }
+        
+        // アップグレードを購入
+        function buyUpgrade(index) {
+            const upgrade = upgrades[index];
+            
+            if (cookies >= upgrade.price && !upgrade.purchased) {
+                cookies -= upgrade.price;
+                upgrade.purchased = true;
+
+                if (upgrade.type === 'click') {
+                    cookiesPerClick *= upgrade.multiplier;
+                } else if (upgrade.type === 'building') {
+                    // 対象の建物のCPSを更新（購入済みの建物も含めて再計算）
+                    const targetBuilding = buildings.find(b => b.id === upgrade.targetId);
+                    if (targetBuilding) {
+                        // 既存の建物が持っているCPSを補正する
+                        // シンプルにするため、このアップグレードは「建物1つあたりの基本CPS」に適用
+                        targetBuilding.cps *= upgrade.multiplier;
+                    }
+                    updateCookiesPerSecond();
+                }
+                
+                updateDisplay();
+                updateShop();
+            }
+        }
+
+        // 秒間クッキー生産量 (CPS) を再計算
+        function updateCookiesPerSecond() {
+            let newCPS = 0;
+            buildings.forEach(item => {
+                newCPS += item.cps * item.count;
+            });
+            cookiesPerSecond = newCPS;
+        }
+
+        // ショップとアップグレードを更新
+        function updateShop() {
+            // 建物ショップの更新
+            shopItemsContainer.innerHTML = '';
+            buildings.forEach((item, index) => {
+                const price = getItemPrice(item);
+                const canAfford = cookies >= price;
+                
+                const shopItem = document.createElement('div');
+                shopItem.className = `shop-item ${canAfford ? '' : 'disabled'}`;
+                shopItem.onclick = canAfford ? () => buyBuilding(index) : null; // クリックで直接購入
+
+                shopItem.innerHTML = `
+                    <div class="item-info">
+                        <h4>${item.emoji} ${item.name} (${formatNumber(item.cps)} CPS)</h4>
+                        <div class="item-description">${item.description}</div>
+                    </div>
+                    <div class="item-purchase">
+                        <div class="item-price">${formatNumber(price)} クッキー</div>
+                        <div class="item-count">所有数: ${item.count}</div>
+                    </div>
+                `;
+                
+                shopItemsContainer.appendChild(shopItem);
+            });
+            
+            // アップグレードショップの更新
+            upgradeItemsContainer.innerHTML = '';
+            upgrades.forEach((upgrade, index) => {
+                if (upgrade.purchased) {
+                    // 購入済みのアップグレードは表示しないか、目立たなくする
+                    const upgradeItem = document.createElement('div');
+                    upgradeItem.className = 'upgrade-item purchased';
+                     upgradeItem.innerHTML = `
+                        <div class="item-info">
+                            <h4>${upgrade.emoji} ${upgrade.name} (購入済み)</h4>
+                            <div class="item-description">${upgrade.description}</div>
+                        </div>
+                    `;
+                    upgradeItemsContainer.appendChild(upgradeItem);
+                    return;
+                }
+
+                const canAfford = cookies >= upgrade.price;
+                
+                const upgradeItem = document.createElement('div');
+                upgradeItem.className = `upgrade-item ${canAfford ? '' : 'disabled'}`;
+                upgradeItem.onclick = canAfford ? () => buyUpgrade(index) : null; // クリックで直接購入
+                
+                upgradeItem.innerHTML = `
+                    <div class="item-info">
+                        <h4>${upgrade.emoji} ${upgrade.name}</h4>
+                        <div class="item-description">${upgrade.description}</div>
+                    </div>
+                    <div class="item-purchase">
+                        <div class="item-price">${formatNumber(upgrade.price)} クッキー</div>
+                        <button class="buy-button upgrade-button" ${canAfford ? '' : 'disabled'}>
+                            購入
+                        </button>
+                    </div>
+                `;
+                
+                upgradeItemsContainer.appendChild(upgradeItem);
+            });
+        }
+
+        // 表示を更新
+        function updateDisplay() {
+            scoreElement.textContent = `${formatNumber(cookies)} クッキー`;
+            perSecondElement.textContent = `毎秒 ${formatNumber(cookiesPerSecond)} クッキー`;
+            perClickElement.textContent = `クリック +${formatNumber(cookiesPerClick)} クッキー`;
+        }
+
+        // 数値をフォーマット (K, M, B)
+        function formatNumber(num) {
+            num = Math.floor(num);
+            if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+            if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); // 3桁カンマ区切り
+        }
+
+        // 自動生産のメインループ (100msごとに実行)
+        setInterval(() => {
+            if (cookiesPerSecond > 0) {
+                // 1000ms（1秒）あたり cookiesPerSecond クッキーなので、100ms（0.1秒）あたりは / 10
+                cookies += cookiesPerSecond / 10;
+                updateDisplay();
+                updateShop(); // ショップアイテムの購入可否を頻繁にチェック
+            }
+        }, 100);
+
+        // 初期化
+        updateCookiesPerSecond();
+        updateDisplay();
+        updateShop();
+        
+        // グローバルスコープに関数を公開 (HTMLのonClickから呼び出すため)
+        window.buyBuilding = buyBuilding;
+        window.buyUpgrade = buyUpgrade;
+    </script>
+</body>
+</html>
