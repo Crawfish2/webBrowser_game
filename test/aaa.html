@@ -271,9 +271,11 @@
 
         // 建物アイテム (Buildings)
         const buildings = [
+            { id: 'cursor', name: "カーソル", description: "毎秒0.5クッキーを生産", basePrice: 5, cps: 0.5, count: 0, emoji: "👆" },
             { id: 'grandma', name: "おばあちゃん", description: "毎秒1クッキーを生産", basePrice: 15, cps: 1, count: 0, emoji: "👵" },
             { id: 'farm', name: "農場", description: "毎秒8クッキーを生産", basePrice: 100, cps: 8, count: 0, emoji: "🚜" },
             { id: 'factory', name: "工場", description: "毎秒47クッキーを生産", basePrice: 1100, cps: 47, count: 0, emoji: "🏭" },
+            { id: 'mine', name: "鉱山", description: "毎秒100クッキーを生産", basePrice: 5000, cps: 100, count: 0, emoji: "🏔" },
             { id: 'bank', name: "銀行", description: "毎秒260クッキーを生産", basePrice: 12000, cps: 260, count: 0, emoji: "🏦" }
         ];
 
@@ -458,6 +460,98 @@
         updateCookiesPerSecond();
         updateDisplay();
         updateShop();
+
+        // === ゴールデンクッキー機能 ===
+
+// ゴールデンクッキーを生成
+function spawnGoldenCookie() {
+    // すでに存在する場合は生成しない
+    if (document.getElementById('goldenCookie')) return;
+
+    const golden = document.createElement('div');
+    golden.id = 'goldenCookie';
+    golden.textContent = '💛';
+    golden.style.position = 'fixed';
+    golden.style.fontSize = '50px';
+    golden.style.cursor = 'pointer';
+    golden.style.transition = 'opacity 0.5s ease';
+    golden.style.zIndex = '1000';
+    golden.style.opacity = '0';
+
+    // 画面内のランダムな位置に出現
+    const x = Math.random() * (window.innerWidth - 100) + 50;
+    const y = Math.random() * (window.innerHeight - 200) + 100;
+    golden.style.left = `${x}px`;
+    golden.style.top = `${y}px`;
+
+    document.body.appendChild(golden);
+    setTimeout(() => golden.style.opacity = '1', 50);
+
+    // クリック時の処理
+    golden.addEventListener('click', () => {
+        // ボーナスをランダムに選択
+        const bonusType = Math.random() < 0.5 ? 'instant' : 'boost';
+        if (bonusType === 'instant') {
+            const reward = Math.floor((cookiesPerSecond + 1) * 100 * (Math.random() * 2 + 1));
+            cookies += reward;
+            showClickEffect(x + 25, y, reward);
+        } else {
+            activateGoldenBoost();
+        }
+
+        golden.remove();
+        scheduleNextGoldenCookie(); // 次のゴールデンクッキー出現をスケジュール
+    });
+
+    // 10秒後に消滅
+    setTimeout(() => {
+        if (golden.parentElement) {
+            golden.style.opacity = '0';
+            setTimeout(() => golden.remove(), 500);
+            scheduleNextGoldenCookie();
+        }
+    }, 10000);
+}
+
+// 一時的な生産ブーストを発動
+let goldenBoostActive = false;
+function activateGoldenBoost() {
+    if (goldenBoostActive) return;
+    goldenBoostActive = true;
+
+    const originalCPS = cookiesPerSecond;
+    cookiesPerSecond *= 2;
+
+    const boostNotice = document.createElement('div');
+    boostNotice.textContent = "✨ ゴールデンブースト！生産量2倍 (10秒) ✨";
+    boostNotice.style.position = 'fixed';
+    boostNotice.style.top = '20px';
+    boostNotice.style.left = '50%';
+    boostNotice.style.transform = 'translateX(-50%)';
+    boostNotice.style.background = 'rgba(255, 215, 0, 0.9)';
+    boostNotice.style.color = '#000';
+    boostNotice.style.padding = '10px 20px';
+    boostNotice.style.borderRadius = '10px';
+    boostNotice.style.fontWeight = 'bold';
+    boostNotice.style.zIndex = '2000';
+    document.body.appendChild(boostNotice);
+
+    setTimeout(() => {
+        cookiesPerSecond = originalCPS;
+        goldenBoostActive = false;
+        boostNotice.remove();
+    }, 10000);
+}
+
+// 次のゴールデンクッキー出現をスケジュール（30〜90秒の間）
+function scheduleNextGoldenCookie() {
+    const nextTime = Math.random() * 60000 + 30000; // 30〜90秒
+    setTimeout(spawnGoldenCookie, nextTime);
+}
+
+// 初回出現をスケジュール
+scheduleNextGoldenCookie();
+
         
         // グローバルスコープに関数を公開 (HTMLのonClickから呼び出すため)
         window.buyBuilding = buyBuilding;
